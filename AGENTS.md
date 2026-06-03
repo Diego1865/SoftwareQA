@@ -8,6 +8,13 @@ This version has breaking changes — APIs, conventions, and file structure may 
 # PROJECT DESCRIPTION
 Mobile only PWA
 
+Tailwindcss 4
+
+Color pallete:
+Blue accent #3094FF #0527FC #212183
+Dark background #101411 #232925
+
+
 ## Name: Scholar Grid
 
 ## Description:
