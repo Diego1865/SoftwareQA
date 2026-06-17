@@ -15,6 +15,14 @@ export interface User {
   bio: string;
 }
 
+export interface Comment {
+  id: string;
+  authorName: string;
+  avatar: string;
+  text: string;
+  createdAt: string;
+}
+
 export interface Post {
   id: string;
   author: User;
@@ -24,6 +32,7 @@ export interface Post {
   tags: Tag[];
   likes: number;
   comments: number;
+  commentsList?: Comment[];
   saves: number;
   createdAt: string;
   isPremium: boolean;
@@ -32,6 +41,8 @@ export interface Post {
   subject?: string;
   liked?: boolean;
   saved?: boolean;
+  purchased?: boolean;
+  reported?: boolean;
 }
 
 export interface Todo {
@@ -41,4 +52,12 @@ export interface Todo {
   label: "study" | "assignment" | "exam" | "personal" | "project";
   dueDate?: string;
   priority: "low" | "medium" | "high";
+}
+
+export interface Activity {
+  id: string;
+  type: "like" | "save" | "comment" | "publish" | "follow";
+  text: string;
+  time: string;
+  accent: string;
 }

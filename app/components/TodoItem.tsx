@@ -8,17 +8,25 @@ interface Props {
 }
 
 const LABEL_COLORS: Record<string, { bg: string; text: string }> = {
-  study: { bg: "#1c2e40", text: "#3094FF" },
-  assignment: { bg: "#2e1c1c", text: "#FF6B6B" },
-  exam: { bg: "#2e2a1c", text: "#FFD700" },
-  personal: { bg: "#1e2e1e", text: "#4CAF50" },
-  project: { bg: "#251c2e", text: "#9B59B6" },
+  study: { bg: "bg-blue-500/10 border-blue-500/20", text: "text-accent-blue" },
+  assignment: { bg: "bg-red-500/10 border-red-500/20", text: "text-red-400" },
+  exam: { bg: "bg-amber-500/10 border-amber-500/20", text: "text-amber-400" },
+  personal: { bg: "bg-emerald-500/10 border-emerald-500/20", text: "text-emerald-400" },
+  project: { bg: "bg-purple-500/10 border-purple-500/20", text: "text-purple-400" },
+};
+
+const LABEL_SPANISH: Record<string, string> = {
+  study: "ESTUDIO",
+  assignment: "TAREA",
+  exam: "EXAMEN",
+  personal: "PERSONAL",
+  project: "PROYECTO",
 };
 
 const PRIORITY_DOT: Record<string, string> = {
-  high: "#FF6B6B",
-  medium: "#FFD700",
-  low: "#4a5a4e",
+  high: "bg-red-500 shadow-md shadow-red-500/30",
+  medium: "bg-amber-400 shadow-md shadow-amber-400/30",
+  low: "bg-text-dark",
 };
 
 export const TodoItem: React.FC<Props> = ({ todo, onToggle, onDelete }) => {
@@ -26,109 +34,66 @@ export const TodoItem: React.FC<Props> = ({ todo, onToggle, onDelete }) => {
 
   return (
     <div
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 12,
-        padding: "12px 0",
-        borderBottom: "1px solid #1a1e1b",
-        opacity: todo.done ? 0.45 : 1,
-        transition: "opacity 0.2s ease",
-      }}
+      className={`flex items-start gap-3.5 py-3.5 border-b border-dark-border/40 transition-all duration-300
+        ${todo.done ? "opacity-40" : "opacity-100"}
+      `}
     >
       {/* Checkbox */}
       <button
         onClick={() => onToggle(todo.id)}
-        style={{
-          width: 20,
-          height: 20,
-          borderRadius: 5,
-          border: todo.done ? "none" : "1.5px solid #3a4a3e",
-          background: todo.done ? "#3094FF" : "transparent",
-          cursor: "pointer",
-          flexShrink: 0,
-          marginTop: 1,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 0,
-        }}
+        className={`w-5 h-5 rounded-md border flex items-center justify-center cursor-pointer transition-all duration-150 flex-shrink-0 mt-0.5
+          ${
+            todo.done 
+              ? "bg-accent-blue border-transparent text-text-light scale-105" 
+              : "border-text-dark hover:border-text-muted bg-transparent"
+          }
+        `}
       >
         {todo.done && (
-          <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-            <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+            <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
       </button>
 
-      {/* Content */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-          <div
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              background: PRIORITY_DOT[todo.priority],
-              flexShrink: 0,
-            }}
-          />
+      {/* Contenido */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1.5">
+          <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${PRIORITY_DOT[todo.priority]}`} />
           <span
-            style={{
-              fontSize: 13,
-              color: "#c8d8ca",
-              fontFamily: "'DM Sans', sans-serif",
-              textDecoration: todo.done ? "line-through" : "none",
-              lineHeight: 1.4,
-            }}
+            className={`text-xs text-text-light font-sans font-medium leading-relaxed block truncate
+              ${todo.done ? "line-through text-text-dark" : ""}
+            `}
           >
             {todo.text}
           </span>
         </div>
 
-        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          <span
-            style={{
-              fontSize: 9,
-              fontWeight: 700,
-              color: lc.text,
-              background: lc.bg,
-              padding: "2px 7px",
-              borderRadius: 4,
-              fontFamily: "monospace",
-              letterSpacing: "0.06em",
-            }}
-          >
-            {todo.label.toUpperCase()}
+        <div className="flex gap-2 items-center">
+          <span className={`text-[8px] font-bold px-2 py-0.5 rounded border font-mono tracking-wider ${lc.bg} ${lc.text}`}>
+            {LABEL_SPANISH[todo.label]}
           </span>
           {todo.dueDate && (
             <span
-              style={{
-                fontSize: 9,
-                color: todo.dueDate === "Today" ? "#FF6B6B" : "#4a5a4e",
-                fontFamily: "monospace",
-              }}
+              className={`text-[8px] font-mono tracking-wide font-bold
+                ${todo.dueDate.toLowerCase() === "today" || todo.dueDate.toLowerCase() === "hoy" 
+                  ? "text-red-400" 
+                  : "text-text-dark"
+                }
+              `}
             >
-              DUE {todo.dueDate.toUpperCase()}
+              VENCE: {todo.dueDate.toUpperCase() === "TODAY" ? "HOY" : todo.dueDate.toUpperCase()}
             </span>
           )}
         </div>
       </div>
 
-      {/* Delete */}
+      {/* Delete button */}
       <button
         onClick={() => onDelete(todo.id)}
-        style={{
-          background: "transparent",
-          border: "none",
-          cursor: "pointer",
-          color: "#2a3a2e",
-          padding: 2,
-          flexShrink: 0,
-          marginTop: 1,
-        }}
+        className="text-text-dark hover:text-red-400 p-1 rounded transition-colors cursor-pointer flex-shrink-0 mt-0.5"
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
         </svg>
       </button>

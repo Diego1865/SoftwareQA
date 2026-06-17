@@ -13,326 +13,182 @@ export const LoginPage: React.FC<Props> = ({ onLogin }) => {
   const [university, setUniversity] = useState("");
   const [role, setRole] = useState<"student" | "creator">("student");
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    background: "#161b17",
-    border: "1px solid #1e2620",
-    borderRadius: 8,
-    padding: "12px 14px",
-    fontSize: 14,
-    color: "#c8d8ca",
-    fontFamily: "'DM Sans', sans-serif",
-    outline: "none",
-    boxSizing: "border-box",
-    transition: "border-color 0.15s ease",
-  };
-
-  const labelStyle: React.CSSProperties = {
-    fontSize: 10,
-    fontWeight: 700,
-    color: "#4a5a4e",
-    fontFamily: "monospace",
-    letterSpacing: "0.1em",
-    display: "block",
-    marginBottom: 6,
-  };
-
   return (
-    <div
-      style={{
-        minHeight: "100dvh",
-        background: "#101411",
-        display: "flex",
-        flexDirection: "column",
-        padding: "0 24px",
-        paddingTop: "env(safe-area-inset-top, 0px)",
-        overflowY: "auto",
-      }}
-    >
-      {/* Header grid accent */}
-      <div
+    <div className="min-h-[100dvh] bg-dark-bg flex flex-col px-6 pt-[env(safe-area-inset-top,32px)] pb-12 overflow-y-auto relative no-scrollbar">
+      
+      {/* Malla decorativa de fondo */}
+      <div className="absolute top-0 left-0 right-0 h-[220px] bg-gradient-to-b from-accent-blue/5 to-transparent pointer-events-none z-0" />
+      <div 
+        className="absolute top-0 left-0 right-0 h-[200px] pointer-events-none opacity-5 z-0"
         style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 220,
-          background:
-            "linear-gradient(180deg, #0527FC08 0%, transparent 100%)",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      />
-
-      {/* Grid lines decoration */}
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 200,
-          backgroundImage:
-            "linear-gradient(#1e262022 1px, transparent 1px), linear-gradient(90deg, #1e262022 1px, transparent 1px)",
+          backgroundImage: "linear-gradient(#1e2620 1px, transparent 1px), linear-gradient(90deg, #1e2620 1px, transparent 1px)",
           backgroundSize: "32px 32px",
-          pointerEvents: "none",
-          zIndex: 0,
         }}
       />
 
-      <div style={{ position: "relative", zIndex: 1, paddingTop: 64 }}>
-        {/* Logo */}
-        <div style={{ marginBottom: 40 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 9,
-                background: "linear-gradient(135deg, #3094FF, #0527FC)",
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 3,
-                padding: 8,
-              }}
-            >
+      <div className="relative z-10 pt-10 flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
+        
+        {/* Logotipo de Scholar Grid */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent-blue to-accent-blue-deep grid grid-cols-2 gap-0.5 p-1.5 shadow-lg shadow-accent-blue/15">
               {[0, 1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  style={{ background: "rgba(255,255,255,0.85)", borderRadius: 2 }}
+                  className="bg-white/85 rounded-[3px]"
                 />
               ))}
             </div>
-            <span
-              style={{
-                fontSize: 22,
-                fontWeight: 800,
-                color: "#e8ede9",
-                fontFamily: "'DM Serif Display', serif",
-                letterSpacing: "-0.02em",
-              }}
-            >
+            <span className="text-2xl font-black text-text-light font-serif tracking-tight">
               Scholar Grid
             </span>
           </div>
-          <p
-            style={{
-              margin: 0,
-              fontSize: 13,
-              color: "#4a5a4e",
-              fontFamily: "'DM Sans', sans-serif",
-              lineHeight: 1.5,
-            }}
-          >
-            The academic content platform for students and creators.
+          <p className="margin-0 text-xs text-text-dark font-sans leading-relaxed">
+            La plataforma de contenido académico para estudiantes y creadores universitarios.
           </p>
         </div>
 
-        {/* Tab switcher */}
-        <div
-          style={{
-            display: "flex",
-            background: "#161b17",
-            borderRadius: 10,
-            padding: 3,
-            marginBottom: 28,
-            border: "1px solid #1e2620",
-          }}
-        >
+        {/* Tab Switcher */}
+        <div className="flex bg-dark-input border border-dark-border rounded-xl p-1 mb-6">
           {(["login", "signup"] as const).map((m) => (
             <button
               key={m}
               onClick={() => setMode(m)}
-              style={{
-                flex: 1,
-                padding: "9px 0",
-                borderRadius: 8,
-                border: "none",
-                cursor: "pointer",
-                fontFamily: "monospace",
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: "0.08em",
-                background: mode === m ? "#3094FF" : "transparent",
-                color: mode === m ? "#fff" : "#4a5a4e",
-                transition: "all 0.15s ease",
-              }}
+              className={`flex-1 py-2 rounded-lg cursor-pointer font-mono text-[10px] font-bold tracking-wider transition-all duration-200
+                ${
+                  mode === m 
+                    ? "bg-accent-blue text-text-light shadow-md shadow-accent-blue/10" 
+                    : "text-text-dark hover:text-text-muted bg-transparent"
+                }
+              `}
             >
-              {m === "login" ? "SIGN IN" : "SIGN UP"}
+              {m === "login" ? "INICIAR SESIÓN" : "REGISTRARSE"}
             </button>
           ))}
         </div>
 
-        {/* Form */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* Formulario */}
+        <div className="flex flex-col gap-4">
           {mode === "signup" && (
-            <>
+            <div className="flex flex-col gap-4 animate-fade-in">
               <div>
-                <label style={labelStyle}>FULL NAME</label>
+                <label className="text-[8px] font-bold text-text-dark font-mono tracking-widest block mb-1.5">NOMBRE COMPLETO</label>
                 <input
-                  style={inputStyle}
+                  type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Valentina Cruz"
+                  className="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-3 text-xs text-text-light outline-none font-sans box-border placeholder-text-dark"
                 />
               </div>
+              
               <div>
-                <label style={labelStyle}>UNIVERSITY</label>
+                <label className="text-[8px] font-bold text-text-dark font-mono tracking-widest block mb-1.5">UNIVERSIDAD</label>
                 <input
-                  style={inputStyle}
+                  type="text"
                   value={university}
                   onChange={(e) => setUniversity(e.target.value)}
-                  placeholder="UNAM, IPN, TEC..."
+                  placeholder="UNAM, IPN, TEC, etc."
+                  className="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-3 text-xs text-text-light outline-none font-sans box-border placeholder-text-dark"
                 />
               </div>
+
               <div>
-                <label style={labelStyle}>ROLE</label>
-                <div style={{ display: "flex", gap: 8 }}>
+                <label className="text-[8px] font-bold text-text-dark font-mono tracking-widest block mb-1.5">ROL EN LA PLATAFORMA</label>
+                <div className="flex gap-2">
                   {(["student", "creator"] as const).map((r) => (
                     <button
                       key={r}
                       onClick={() => setRole(r)}
-                      style={{
-                        flex: 1,
-                        padding: "10px 0",
-                        borderRadius: 8,
-                        border: `1px solid ${role === r ? "#3094FF" : "#1e2620"}`,
-                        cursor: "pointer",
-                        fontFamily: "monospace",
-                        fontSize: 11,
-                        fontWeight: 700,
-                        letterSpacing: "0.08em",
-                        background: role === r ? "#3094FF18" : "#161b17",
-                        color: role === r ? "#3094FF" : "#4a5a4e",
-                        transition: "all 0.15s ease",
-                      }}
+                      className={`flex-1 py-2.5 rounded-xl border font-mono text-[10px] font-bold tracking-wider cursor-pointer transition-all duration-150
+                        ${
+                          role === r 
+                            ? "border-accent-blue bg-accent-blue/10 text-accent-blue shadow-sm" 
+                            : "border-dark-border bg-dark-input text-text-dark hover:text-text-muted"
+                        }
+                      `}
                     >
-                      {r.toUpperCase()}
+                      {r === "student" ? "ESTUDIANTE" : "CREADOR"}
                     </button>
                   ))}
                 </div>
               </div>
-            </>
+            </div>
           )}
 
           <div>
-            <label style={labelStyle}>EMAIL</label>
+            <label className="text-[8px] font-bold text-text-dark font-mono tracking-widest block mb-1.5">CORREO ELECTRÓNICO</label>
             <input
-              style={inputStyle}
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@university.edu"
+              placeholder="tu@universidad.edu"
+              className="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-3 text-xs text-text-light outline-none font-sans box-border placeholder-text-dark"
             />
           </div>
 
           <div>
-            <label style={labelStyle}>PASSWORD</label>
+            <label className="text-[8px] font-bold text-text-dark font-mono tracking-widest block mb-1.5">CONTRASEÑA</label>
             <input
-              style={inputStyle}
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
+              className="w-full bg-dark-input border border-dark-border rounded-xl px-4 py-3 text-xs text-text-light outline-none font-sans box-border placeholder-text-dark"
             />
           </div>
 
           {mode === "login" && (
-            <div style={{ textAlign: "right", marginTop: -8 }}>
+            <div className="text-right -mt-1.5">
               <button
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: 11,
-                  color: "#3094FF",
-                  fontFamily: "monospace",
-                  padding: 0,
-                }}
+                type="button"
+                onClick={() => alert("Simulación de recuperación de contraseña enviada.")}
+                className="bg-transparent border-none cursor-pointer text-[9px] text-accent-blue font-mono font-bold hover:underline p-0"
               >
-                FORGOT PASSWORD?
+                ¿OLVIDASTE TU CONTRASEÑA?
               </button>
             </div>
           )}
 
+          {/* Botón Principal */}
           <button
             onClick={() => onLogin("feed")}
-            style={{
-              width: "100%",
-              padding: "14px 0",
-              borderRadius: 10,
-              border: "none",
-              cursor: "pointer",
-              background: "linear-gradient(135deg, #3094FF, #0527FC)",
-              color: "#fff",
-              fontSize: 14,
-              fontWeight: 700,
-              fontFamily: "monospace",
-              letterSpacing: "0.1em",
-              marginTop: 4,
-              boxShadow: "0 4px 20px #3094FF30",
-              transition: "opacity 0.15s ease",
-            }}
+            className="w-full py-3.5 rounded-xl border-none cursor-pointer bg-gradient-to-r from-accent-blue to-accent-blue-deep text-text-light text-xs font-bold font-mono tracking-wider shadow-lg shadow-accent-blue/15 hover:opacity-95 mt-1.5"
           >
-            {mode === "login" ? "SIGN IN →" : "CREATE ACCOUNT →"}
+            {mode === "login" ? "INICIAR SESIÓN →" : "CREAR CUENTA →"}
           </button>
 
           {mode === "signup" && (
-            <p
-              style={{
-                textAlign: "center",
-                fontSize: 11,
-                color: "#3a4a3e",
-                fontFamily: "monospace",
-                lineHeight: 1.6,
-                margin: 0,
-              }}
-            >
-              BY SIGNING UP YOU AGREE TO OUR{" "}
-              <span style={{ color: "#3094FF" }}>TERMS OF SERVICE</span> AND{" "}
-              <span style={{ color: "#3094FF" }}>PRIVACY POLICY</span>
+            <p className="text-center text-[9px] text-text-dark font-mono leading-relaxed mt-1">
+              AL REGISTRARTE ACEPTAS NUESTROS{" "}
+              <span className="text-accent-blue hover:underline cursor-pointer">TÉRMINOS DE SERVICIO</span> Y NUESTRAS{" "}
+              <span className="text-accent-blue hover:underline cursor-pointer">POLÍTICAS DE PRIVACIDAD</span>
             </p>
           )}
         </div>
 
-        {/* Social auth divider */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            margin: "28px 0 20px",
-          }}
-        >
-          <div style={{ flex: 1, height: 1, background: "#1e2620" }} />
-          <span style={{ fontSize: 9, color: "#2a3a2e", fontFamily: "monospace" }}>
-            OR CONTINUE WITH
+        {/* Separador de red social */}
+        <div className="flex items-center gap-3.5 my-6">
+          <div className="flex-1 h-[1px] bg-dark-border/60" />
+          <span className="text-[8px] text-text-dark font-mono font-bold tracking-widest">
+            O CONTINÚA CON
           </span>
-          <div style={{ flex: 1, height: 1, background: "#1e2620" }} />
+          <div className="flex-1 h-[1px] bg-dark-border/60" />
         </div>
 
-        <div style={{ display: "flex", gap: 10, paddingBottom: 40 }}>
+        {/* Proveedores OAuth */}
+        <div className="flex gap-2.5">
           {["GOOGLE", "MICROSOFT"].map((provider) => (
             <button
               key={provider}
-              style={{
-                flex: 1,
-                padding: "11px 0",
-                borderRadius: 8,
-                border: "1px solid #1e2620",
-                background: "#161b17",
-                color: "#8fa893",
-                fontSize: 11,
-                fontWeight: 700,
-                fontFamily: "monospace",
-                letterSpacing: "0.08em",
-                cursor: "pointer",
-              }}
+              onClick={() => onLogin("feed")}
+              className="flex-1 py-2.5 rounded-xl border border-dark-border bg-dark-input text-text-muted hover:text-text-light hover:border-dark-border/60 text-[10px] font-bold font-mono tracking-wider cursor-pointer transition-all"
             >
               {provider}
             </button>
           ))}
         </div>
+
       </div>
     </div>
   );

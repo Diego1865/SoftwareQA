@@ -8,14 +8,15 @@ import { UploadPage } from "./pages/UploadPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { LoginPage } from "./pages/LoginPage";
 import { BottomNav } from "./components/BottomNav";
+import { useApp } from "./context/AppContext";
 
 export default function Home() {
+  const { isAuthenticated, loginUser } = useApp();
   const [screen, setScreen] = useState<Screen>("feed");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const handleLogin = (target: Screen) => {
-    setIsAuthenticated(true);
-    setScreen(target);
+  const handleLogin = () => {
+    loginUser();
+    setScreen("feed");
   };
 
   if (!isAuthenticated) {
@@ -38,7 +39,7 @@ export default function Home() {
   };
 
   return (
-    <div style={{ background: "#101411", minHeight: "100dvh" }}>
+    <div className="bg-dark-bg min-h-[100dvh] pb-[60px]">
       {renderScreen()}
       <BottomNav active={screen} onNavigate={setScreen} />
     </div>

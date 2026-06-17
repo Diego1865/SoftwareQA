@@ -9,7 +9,7 @@ interface Props {
 const NAV_ITEMS: { id: Screen; label: string; icon: React.ReactNode }[] = [
   {
     id: "feed",
-    label: "Feed",
+    label: "Inicio",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
@@ -19,7 +19,7 @@ const NAV_ITEMS: { id: Screen; label: string; icon: React.ReactNode }[] = [
   },
   {
     id: "todo",
-    label: "Tasks",
+    label: "Tareas",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
@@ -28,16 +28,16 @@ const NAV_ITEMS: { id: Screen; label: string; icon: React.ReactNode }[] = [
   },
   {
     id: "upload",
-    label: "Post",
+    label: "Publicar",
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" />
+        <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
       </svg>
     ),
   },
   {
     id: "profile",
-    label: "Profile",
+    label: "Perfil",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" />
@@ -48,22 +48,7 @@ const NAV_ITEMS: { id: Screen; label: string; icon: React.ReactNode }[] = [
 
 export const BottomNav: React.FC<Props> = ({ active, onNavigate }) => {
   return (
-    <nav
-      style={{
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 60,
-        background: "#0e1210",
-        borderTop: "1px solid #1e2620",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-around",
-        zIndex: 100,
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
-      }}
-    >
+    <nav className="fixed bottom-0 left-0 right-0 h-[64px] bg-dark-bg/85 backdrop-blur-md border-t border-dark-border flex items-center justify-around z-50 pb-[env(safe-area-inset-bottom,0px)] px-4">
       {NAV_ITEMS.map((item) => {
         const isActive = active === item.id;
         const isPost = item.id === "upload";
@@ -71,29 +56,28 @@ export const BottomNav: React.FC<Props> = ({ active, onNavigate }) => {
           <button
             key={item.id}
             onClick={() => onNavigate(item.id)}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 3,
-              background: isPost
-                ? isActive
-                  ? "#0527FC"
-                  : "#3094FF"
-                : "transparent",
-              border: "none",
-              cursor: "pointer",
-              padding: isPost ? "8px 16px" : "6px 12px",
-              borderRadius: isPost ? 28 : 8,
-              color: isActive ? (isPost ? "#fff" : "#3094FF") : "#4a5a4e",
-              transition: "all 0.15s ease",
-              minWidth: 48,
-            }}
+            className={`flex flex-col items-center justify-center gap-1 cursor-pointer transition-all duration-200 active:scale-90
+              ${
+                isPost
+                  ? `h-11 w-11 rounded-full ${
+                      isActive 
+                        ? "bg-accent-blue-deep text-text-light shadow-lg shadow-accent-blue/40" 
+                        : "bg-accent-blue text-text-light hover:bg-accent-blue/90 shadow-md shadow-accent-blue/20"
+                    }`
+                  : `px-3 py-1.5 rounded-xl ${
+                      isActive 
+                        ? "text-accent-blue" 
+                        : "text-text-dark hover:text-text-muted"
+                    }`
+              }
+            `}
           >
-            {item.icon}
+            <div className={`${isPost ? "scale-110" : ""}`}>
+              {item.icon}
+            </div>
             {!isPost && (
-              <span style={{ fontSize: 9, fontFamily: "monospace", letterSpacing: "0.08em", fontWeight: isActive ? 700 : 400 }}>
-                {item.label.toUpperCase()}
+              <span className={`text-[9px] font-mono tracking-wider ${isActive ? "font-bold" : "font-normal"}`}>
+                {item.label}
               </span>
             )}
           </button>

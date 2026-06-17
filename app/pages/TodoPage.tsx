@@ -1,12 +1,20 @@
 import React, { useState } from "react";
 import { Todo } from "../utils/types";
 import { TodoItem } from "../components/TodoItem";
-import { MOCK_TODOS } from "../utils/data";
+import { useApp } from "../context/AppContext";
 
 const LABELS: Todo["label"][] = ["study", "assignment", "exam", "personal", "project"];
 const PRIORITIES: Todo["priority"][] = ["high", "medium", "low"];
 
 const LABEL_COLORS: Record<string, string> = {
+  study: "border-blue-500/20 bg-blue-500/10 text-accent-blue",
+  assignment: "border-red-500/20 bg-red-500/10 text-red-400",
+  exam: "border-amber-500/20 bg-amber-500/10 text-amber-400",
+  personal: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
+  project: "border-purple-500/20 bg-purple-500/10 text-purple-400",
+};
+
+const LABEL_COLORS_RAW: Record<string, string> = {
   study: "#3094FF",
   assignment: "#FF6B6B",
   exam: "#FFD700",
@@ -14,40 +22,34 @@ const LABEL_COLORS: Record<string, string> = {
   project: "#9B59B6",
 };
 
-const PRIORITY_LABELS: Record<string, string> = {
-  high: "HIGH",
-  medium: "MED",
-  low: "LOW",
+const LABEL_SPANISH: Record<string, string> = {
+  study: "ESTUDIO",
+  assignment: "TAREA",
+  exam: "EXAMEN",
+  personal: "PERSONAL",
+  project: "PROYECTO",
+};
+
+const PRIORITY_LABELS_SPANISH: Record<string, string> = {
+  high: "ALTA",
+  medium: "MEDIA",
+  low: "BAJA",
 };
 
 export const TodoPage: React.FC = () => {
-  const [todos, setTodos] = useState<Todo[]>(MOCK_TODOS);
+  const { todos, addTodoItem, toggleTodoItem, deleteTodoItem } = useApp();
   const [activeLabel, setActiveLabel] = useState<Todo["label"] | "all">("all");
   const [showAdd, setShowAdd] = useState(false);
 
-  // New item state
+  // Estado del nuevo elemento
   const [newText, setNewText] = useState("");
   const [newLabel, setNewLabel] = useState<Todo["label"]>("study");
   const [newPriority, setNewPriority] = useState<Todo["priority"]>("medium");
   const [newDue, setNewDue] = useState("");
 
-  const toggle = (id: string) =>
-    setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
-
-  const remove = (id: string) =>
-    setTodos((prev) => prev.filter((t) => t.id !== id));
-
-  const addTodo = () => {
+  const handleAddTask = () => {
     if (!newText.trim()) return;
-    const todo: Todo = {
-      id: `t${Date.now()}`,
-      text: newText.trim(),
-      done: false,
-      label: newLabel,
-      priority: newPriority,
-      dueDate: newDue || undefined,
-    };
-    setTodos((prev) => [todo, ...prev]);
+    addTodoItem(newText.trim(), newLabel, newPriority, newDue);
     setNewText("");
     setNewDue("");
     setShowAdd(false);
@@ -58,50 +60,29 @@ export const TodoPage: React.FC = () => {
   const done = todos.filter((t) => t.done).length;
 
   return (
-    <div
-      style={{
-        background: "#101411",
-        minHeight: "100dvh",
-        paddingBottom: 80,
-        paddingTop: "env(safe-area-inset-top, 0px)",
-      }}
-    >
-      {/* Header */}
-      <div style={{ padding: "20px 16px 0" }}>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+    <div className="bg-dark-bg min-h-[100dvh] pb-24 pt-[env(safe-area-inset-top,0px)] px-4">
+      
+      {/* Cabecera */}
+      <div className="pt-6">
+        <div className="flex items-start justify-between">
           <div>
-            <h1
-              style={{
-                margin: "0 0 2px",
-                fontSize: 24,
-                fontWeight: 800,
-                color: "#e8ede9",
-                fontFamily: "'DM Serif Display', serif",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              My Tasks
+            <h1 className="margin-0 text-2xl font-extrabold text-text-light font-serif tracking-tight">
+              Mis Tareas
             </h1>
-            <p style={{ margin: 0, fontSize: 11, color: "#4a5a4e", fontFamily: "monospace" }}>
-              {pending} PENDING · {done} COMPLETED
+            <p className="margin-0 text-[10px] text-text-dark font-mono mt-1 font-bold tracking-wider uppercase">
+              {pending} PENDIENTES · {done} COMPLETADAS
             </p>
           </div>
+          
           <button
             onClick={() => setShowAdd(!showAdd)}
-            style={{
-              background: showAdd ? "#232925" : "linear-gradient(135deg, #3094FF, #0527FC)",
-              border: "none",
-              borderRadius: 10,
-              width: 40,
-              height: 40,
-              cursor: "pointer",
-              color: "#fff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: showAdd ? "none" : "0 4px 16px #3094FF30",
-              transition: "all 0.15s ease",
-            }}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer transition-all duration-200
+              ${
+                showAdd 
+                  ? "bg-dark-card text-text-light border border-dark-border" 
+                  : "bg-accent-blue text-text-light hover:bg-accent-blue/90 shadow-lg shadow-accent-blue/20"
+              }
+            `}
           >
             <svg
               width="18"
@@ -112,10 +93,7 @@ export const TodoPage: React.FC = () => {
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
-              style={{
-                transform: showAdd ? "rotate(45deg)" : "none",
-                transition: "transform 0.2s ease",
-              }}
+              className={`transition-transform duration-300 ${showAdd ? "rotate-45" : "none"}`}
             >
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
@@ -123,251 +101,144 @@ export const TodoPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Progress bar */}
-        <div
-          style={{
-            margin: "16px 0 0",
-            height: 4,
-            background: "#1e2620",
-            borderRadius: 99,
-            overflow: "hidden",
-          }}
-        >
+        {/* Barra de progreso */}
+        <div className="mt-4 h-1.5 bg-dark-border rounded-full overflow-hidden">
           <div
-            style={{
-              height: "100%",
-              width: `${todos.length ? (done / todos.length) * 100 : 0}%`,
-              background: "linear-gradient(90deg, #3094FF, #0527FC)",
-              borderRadius: 99,
-              transition: "width 0.4s ease",
-            }}
+            className="h-full bg-gradient-to-r from-accent-blue to-accent-blue-deep rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${todos.length ? (done / todos.length) * 100 : 0}%` }}
           />
         </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginTop: 4,
-            marginBottom: 14,
-          }}
-        >
-          <span style={{ fontSize: 9, color: "#3a4a3e", fontFamily: "monospace" }}>
-            {todos.length ? Math.round((done / todos.length) * 100) : 0}% DONE
+        <div className="flex justify-between mt-1.5 mb-4">
+          <span className="text-[8px] text-text-dark font-mono font-bold tracking-widest">PROGRESO GENERAL</span>
+          <span className="text-[9px] text-accent-blue font-mono font-bold">
+            {todos.length ? Math.round((done / todos.length) * 100) : 0}% COMPLETADO
           </span>
         </div>
       </div>
 
-      {/* Add task panel */}
+      {/* Panel para agregar tarea */}
       {showAdd && (
-        <div
-          style={{
-            margin: "0 16px 16px",
-            background: "#161b17",
-            border: "1px solid #1e2620",
-            borderRadius: 12,
-            padding: 16,
-            display: "flex",
-            flexDirection: "column",
-            gap: 12,
-          }}
-        >
-          <textarea
-            value={newText}
-            onChange={(e) => setNewText(e.target.value)}
-            placeholder="What needs to be done?"
-            rows={2}
-            style={{
-              background: "#0e1210",
-              border: "1px solid #1e2620",
-              borderRadius: 8,
-              padding: "10px 12px",
-              fontSize: 13,
-              color: "#c8d8ca",
-              fontFamily: "'DM Sans', sans-serif",
-              outline: "none",
-              resize: "none",
-              width: "100%",
-              boxSizing: "border-box",
-            }}
-          />
+        <div className="bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col gap-3.5 mb-4 animate-scale-in">
+          <div>
+            <textarea
+              value={newText}
+              onChange={(e) => setNewText(e.target.value)}
+              placeholder="¿Qué hay que hacer?"
+              rows={2}
+              className="w-full bg-dark-input border border-dark-border rounded-xl p-3 text-xs text-text-light outline-none resize-none placeholder-text-dark font-sans box-border"
+            />
+          </div>
 
-          <div style={{ display: "flex", gap: 8 }}>
-            <div style={{ flex: 1 }}>
-              <span style={{ fontSize: 9, fontWeight: 700, color: "#4a5a4e", fontFamily: "monospace", letterSpacing: "0.08em", display: "block", marginBottom: 5 }}>
-                LABEL
-              </span>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-                {LABELS.map((l) => (
-                  <button
-                    key={l}
-                    onClick={() => setNewLabel(l)}
-                    style={{
-                      padding: "4px 9px",
-                      borderRadius: 5,
-                      border: `1px solid ${newLabel === l ? LABEL_COLORS[l] + "66" : "#1e2620"}`,
-                      background: newLabel === l ? LABEL_COLORS[l] + "18" : "transparent",
-                      color: newLabel === l ? LABEL_COLORS[l] : "#3a4a3e",
-                      fontSize: 9,
-                      fontWeight: 700,
-                      fontFamily: "monospace",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {l.toUpperCase()}
-                  </button>
-                ))}
-              </div>
+          {/* Selección de Categoría / Etiqueta */}
+          <div>
+            <span className="text-[8px] font-bold text-text-dark font-mono tracking-widest block mb-2">ETIQUETA DE CATEGORÍA</span>
+            <div className="flex flex-wrap gap-1.5">
+              {LABELS.map((l) => (
+                <button
+                  key={l}
+                  onClick={() => setNewLabel(l)}
+                  className={`px-3 py-1 rounded-lg text-[9px] font-bold font-mono cursor-pointer border transition-all duration-150
+                    ${
+                      newLabel === l 
+                        ? LABEL_COLORS[l]
+                        : "border-dark-border text-text-dark bg-transparent hover:text-text-muted"
+                    }
+                  `}
+                >
+                  {LABEL_SPANISH[l]}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: 8 }}>
-            <div style={{ flex: 1 }}>
-              <span style={{ fontSize: 9, fontWeight: 700, color: "#4a5a4e", fontFamily: "monospace", letterSpacing: "0.08em", display: "block", marginBottom: 5 }}>
-                PRIORITY
-              </span>
-              <div style={{ display: "flex", gap: 5 }}>
+          {/* Selección de Prioridad y Fecha */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <span className="text-[8px] font-bold text-text-dark font-mono tracking-widest block mb-2">PRIORIDAD</span>
+              <div className="flex gap-1.5">
                 {PRIORITIES.map((p) => {
-                  const colors: Record<string, string> = { high: "#FF6B6B", medium: "#FFD700", low: "#4a5a4e" };
+                  const colorsRaw: Record<string, string> = { high: "text-red-400 bg-red-500/10 border-red-500/20", medium: "text-amber-400 bg-amber-500/10 border-amber-500/20", low: "text-text-dark bg-transparent border-dark-border" };
+                  const selectedColors: Record<string, string> = { high: "text-red-400 bg-red-500/15 border-red-500/30", medium: "text-amber-400 bg-amber-500/15 border-amber-500/30", low: "text-text-muted bg-dark-border border-dark-border" };
                   return (
                     <button
                       key={p}
                       onClick={() => setNewPriority(p)}
-                      style={{
-                        flex: 1,
-                        padding: "5px 0",
-                        borderRadius: 5,
-                        border: `1px solid ${newPriority === p ? colors[p] + "66" : "#1e2620"}`,
-                        background: newPriority === p ? colors[p] + "18" : "transparent",
-                        color: newPriority === p ? colors[p] : "#3a4a3e",
-                        fontSize: 9,
-                        fontWeight: 700,
-                        fontFamily: "monospace",
-                        cursor: "pointer",
-                      }}
+                      className={`flex-1 py-1 rounded-lg text-[9px] font-bold font-mono cursor-pointer border transition-all duration-150
+                        ${newPriority === p ? selectedColors[p] : colorsRaw[p]}
+                      `}
                     >
-                      {PRIORITY_LABELS[p]}
+                      {PRIORITY_LABELS_SPANISH[p]}
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            <div style={{ flex: 1 }}>
-              <span style={{ fontSize: 9, fontWeight: 700, color: "#4a5a4e", fontFamily: "monospace", letterSpacing: "0.08em", display: "block", marginBottom: 5 }}>
-                DUE DATE
-              </span>
+            <div>
+              <span className="text-[8px] font-bold text-text-dark font-mono tracking-widest block mb-2">FECHA DE ENTREGA</span>
               <input
                 type="text"
                 value={newDue}
                 onChange={(e) => setNewDue(e.target.value)}
-                placeholder="e.g. Jun 10"
-                style={{
-                  width: "100%",
-                  background: "#0e1210",
-                  border: "1px solid #1e2620",
-                  borderRadius: 5,
-                  padding: "5px 8px",
-                  fontSize: 11,
-                  color: "#c8d8ca",
-                  fontFamily: "monospace",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
+                placeholder="ej. Jun 10 o Hoy"
+                className="w-full bg-dark-input border border-dark-border rounded-lg px-3 py-1.5 text-xs text-text-light outline-none font-mono box-border placeholder-text-dark"
               />
             </div>
           </div>
 
+          {/* Botón Guardar Tarea */}
           <button
-            onClick={addTodo}
-            style={{
-              background: "linear-gradient(135deg, #3094FF, #0527FC)",
-              border: "none",
-              borderRadius: 8,
-              padding: "11px 0",
-              cursor: "pointer",
-              color: "#fff",
-              fontSize: 12,
-              fontWeight: 700,
-              fontFamily: "monospace",
-              letterSpacing: "0.08em",
-            }}
+            onClick={handleAddTask}
+            disabled={!newText.trim()}
+            className="w-full bg-gradient-to-r from-accent-blue to-accent-blue-deep text-text-light font-bold font-mono text-xs py-3 rounded-xl cursor-pointer hover:opacity-95 shadow-md shadow-accent-blue/15 disabled:opacity-45 transition-opacity"
           >
-            ADD TASK
+            AÑADIR TAREA
           </button>
         </div>
       )}
 
-      {/* Label filter */}
-      <div
-        style={{
-          display: "flex",
-          gap: 0,
-          overflowX: "auto",
-          padding: "0 16px 12px",
-          scrollbarWidth: "none",
-        }}
-      >
+      {/* Filtro de etiquetas */}
+      <div className="flex gap-0 overflow-x-auto no-scrollbar border-b border-dark-border/40 mb-3 py-1">
         <button
           onClick={() => setActiveLabel("all")}
-          style={{
-            flexShrink: 0,
-            padding: "6px 12px",
-            background: "transparent",
-            border: "none",
-            borderBottom: `2px solid ${activeLabel === "all" ? "#3094FF" : "transparent"}`,
-            cursor: "pointer",
-            color: activeLabel === "all" ? "#3094FF" : "#3a4a3e",
-            fontSize: 9,
-            fontWeight: 700,
-            fontFamily: "monospace",
-            letterSpacing: "0.08em",
-          }}
+          className={`flex-shrink-0 px-4 py-1.5 text-[9px] font-extrabold font-mono tracking-wider cursor-pointer border-b-2 transition-colors
+            ${activeLabel === "all" ? "border-accent-blue text-accent-blue" : "border-transparent text-text-dark hover:text-text-muted"}
+          `}
         >
-          ALL
+          TODAS
         </button>
         {LABELS.map((l) => (
           <button
             key={l}
             onClick={() => setActiveLabel(l)}
-            style={{
-              flexShrink: 0,
-              padding: "6px 12px",
-              background: "transparent",
-              border: "none",
-              borderBottom: `2px solid ${activeLabel === l ? LABEL_COLORS[l] : "transparent"}`,
-              cursor: "pointer",
-              color: activeLabel === l ? LABEL_COLORS[l] : "#3a4a3e",
-              fontSize: 9,
-              fontWeight: 700,
-              fontFamily: "monospace",
-              letterSpacing: "0.08em",
-            }}
+            className={`flex-shrink-0 px-4 py-1.5 text-[9px] font-extrabold font-mono tracking-wider cursor-pointer border-b-2 transition-colors
+              ${activeLabel === l ? `text-[${LABEL_COLORS_RAW[l]}]` : "border-transparent text-text-dark hover:text-text-muted"}
+            `}
+            style={{ borderBottomColor: activeLabel === l ? LABEL_COLORS_RAW[l] : "transparent", color: activeLabel === l ? LABEL_COLORS_RAW[l] : undefined }}
           >
-            {l.toUpperCase()}
+            {LABEL_SPANISH[l]}
           </button>
         ))}
       </div>
 
-      {/* Task list */}
-      <div style={{ padding: "0 16px" }}>
+      {/* Listado de tareas */}
+      <div className="flex flex-col">
         {filtered.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              paddingTop: 40,
-              color: "#2a3a2e",
-              fontFamily: "monospace",
-              fontSize: 11,
-            }}
-          >
-            NO TASKS IN THIS CATEGORY
+          <div className="text-center py-12 text-xs text-text-dark font-mono tracking-widest">
+            SIN TAREAS EN ESTA CATEGORÍA
           </div>
         ) : (
           filtered.map((todo) => (
-            <TodoItem key={todo.id} todo={todo} onToggle={toggle} onDelete={remove} />
+            <TodoItem 
+              key={todo.id} 
+              todo={todo} 
+              onToggle={toggleTodoItem} 
+              onDelete={deleteTodoItem} 
+            />
           ))
         )}
       </div>
+
     </div>
   );
 };
