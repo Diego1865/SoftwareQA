@@ -48,7 +48,7 @@ export const PostCard: React.FC<Props> = ({ post }) => {
   
   const accentText = TYPE_ACCENT_TEXT[post.type];
   const accentBg = TYPE_ACCENT_BG[post.type];
-  const isAuthor = post.author.id === currentUser.id;
+  const isAuthor = !!currentUser && post.author.id === currentUser.id;
 
   // Si fue reportado por derechos de autor, se muestra una advertencia de moderación
   if (post.reported) {

@@ -65,7 +65,7 @@ export const FeedPage: React.FC<Props> = ({ onNavigate }) => {
             onClick={() => onNavigate("profile")}
             className="w-8 h-8 rounded-full bg-accent-blue/10 border border-accent-blue/30 flex items-center justify-center text-xs font-bold font-mono text-accent-blue cursor-pointer transition-transform active:scale-95 p-0"
           >
-            {currentUser.avatar}
+            {currentUser?.avatar}
           </button>
         </div>
 

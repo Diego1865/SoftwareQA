@@ -1,17 +1,51 @@
+"use client";
+
 import React, { useState } from "react";
-import { Screen } from "../utils/types";
+import { useApp } from "../context/AppContext";
 
-interface Props {
-  onLogin: (screen: Screen) => void;
-}
-
-export const LoginPage: React.FC<Props> = ({ onLogin }) => {
+export const LoginPage: React.FC = () => {
+  const { loginUser, signupUser, authError } = useApp();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [university, setUniversity] = useState("");
   const [role, setRole] = useState<"student" | "creator">("student");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  const handleSubmit = async () => {
+    setLocalError(null);
+
+    if (!email.trim() || !password) {
+      setLocalError("Ingresa tu correo y contraseña.");
+      return;
+    }
+    if (mode === "signup" && !name.trim()) {
+      setLocalError("Ingresa tu nombre completo.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const success =
+      mode === "login"
+        ? await loginUser(email.trim(), password)
+        : await signupUser({
+            name: name.trim(),
+            university: university.trim(),
+            role,
+            email: email.trim(),
+            password,
+          });
+    setIsSubmitting(false);
+
+    // On success, AppContext flips isAuthenticated/currentUser and
+    // app/page.tsx swaps to the main app automatically — nothing else to
+    // do here. On failure, authError (from context) surfaces the message.
+    if (!success) return;
+  };
+
+  const errorMessage = localError || authError;
 
   return (
     <div className="min-h-[100dvh] bg-dark-bg flex flex-col px-6 pt-[env(safe-area-inset-top,32px)] pb-12 overflow-y-auto relative no-scrollbar">
@@ -53,7 +87,10 @@ export const LoginPage: React.FC<Props> = ({ onLogin }) => {
           {(["login", "signup"] as const).map((m) => (
             <button
               key={m}
-              onClick={() => setMode(m)}
+              onClick={() => {
+                setMode(m);
+                setLocalError(null);
+              }}
               className={`flex-1 py-2 rounded-lg cursor-pointer font-mono text-[10px] font-bold tracking-wider transition-all duration-200
                 ${
                   mode === m 
@@ -150,12 +187,23 @@ export const LoginPage: React.FC<Props> = ({ onLogin }) => {
             </div>
           )}
 
+          {errorMessage && (
+            <p className="text-[10px] text-red-400 font-mono leading-relaxed -mt-1">
+              {errorMessage}
+            </p>
+          )}
+
           {/* Botón Principal */}
           <button
-            onClick={() => onLogin("feed")}
-            className="w-full py-3.5 rounded-xl border-none cursor-pointer bg-gradient-to-r from-accent-blue to-accent-blue-deep text-text-light text-xs font-bold font-mono tracking-wider shadow-lg shadow-accent-blue/15 hover:opacity-95 mt-1.5"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="w-full py-3.5 rounded-xl border-none cursor-pointer bg-gradient-to-r from-accent-blue to-accent-blue-deep text-text-light text-xs font-bold font-mono tracking-wider shadow-lg shadow-accent-blue/15 hover:opacity-95 mt-1.5 disabled:opacity-50"
           >
-            {mode === "login" ? "INICIAR SESIÓN →" : "CREAR CUENTA →"}
+            {isSubmitting
+              ? "PROCESANDO…"
+              : mode === "login"
+              ? "INICIAR SESIÓN →"
+              : "CREAR CUENTA →"}
           </button>
 
           {mode === "signup" && (
@@ -176,12 +224,12 @@ export const LoginPage: React.FC<Props> = ({ onLogin }) => {
           <div className="flex-1 h-[1px] bg-dark-border/60" />
         </div>
 
-        {/* Proveedores OAuth */}
+        {/* Proveedores OAuth — decorativos, no implementados */}
         <div className="flex gap-2.5">
           {["GOOGLE", "MICROSOFT"].map((provider) => (
             <button
               key={provider}
-              onClick={() => onLogin("feed")}
+              onClick={() => alert(`Inicio de sesión con ${provider} no está disponible en esta versión.`)}
               className="flex-1 py-2.5 rounded-xl border border-dark-border bg-dark-input text-text-muted hover:text-text-light hover:border-dark-border/60 text-[10px] font-bold font-mono tracking-wider cursor-pointer transition-all"
             >
               {provider}

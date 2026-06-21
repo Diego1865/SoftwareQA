@@ -11,16 +11,21 @@ import { BottomNav } from "./components/BottomNav";
 import { useApp } from "./context/AppContext";
 
 export default function Home() {
-  const { isAuthenticated, loginUser } = useApp();
+  const { isAuthenticated, isLoading, currentUser } = useApp();
   const [screen, setScreen] = useState<Screen>("feed");
 
-  const handleLogin = () => {
-    loginUser();
-    setScreen("feed");
-  };
+  // While we're checking the session cookie against the server, avoid
+  // flashing the login screen for users who are actually already logged in.
+  if (isLoading) {
+    return (
+      <div className="bg-dark-bg min-h-[100dvh] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-accent-blue border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
-  if (!isAuthenticated) {
-    return <LoginPage onLogin={handleLogin} />;
+  if (!isAuthenticated || !currentUser) {
+    return <LoginPage />;
   }
 
   const renderScreen = () => {

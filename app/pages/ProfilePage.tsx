@@ -122,7 +122,12 @@ export const ProfilePage: React.FC<Props> = ({ onNavigate }) => {
   const { currentUser, posts, activityLog, updateBio, logoutUser } = useApp();
   const [activeTab, setActiveTab] = useState<Tab>("posts");
   const [editBio, setEditBio] = useState(false);
-  const [tempBio, setTempBio] = useState(currentUser.bio);
+  const [tempBio, setTempBio] = useState(currentUser?.bio ?? "");
+
+  // ProfilePage is only ever rendered once app/page.tsx has confirmed a
+  // logged-in user, so this should never actually trigger — it's just here
+  // so TypeScript (and any future caller) can't render this with no user.
+  if (!currentUser) return null;
 
   const rc = ROLE_COLORS[currentUser.role] || ROLE_COLORS.student;
 

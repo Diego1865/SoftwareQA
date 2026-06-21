@@ -1,15 +1,16 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { Post, Todo, User, Activity, Comment } from "../utils/types";
-import { CURRENT_USER, MOCK_POSTS, MOCK_TODOS } from "../utils/data";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { Post, Todo, User, Activity } from "../utils/types";
 
 interface AppContextType {
-  currentUser: User;
+  currentUser: User | null;
   posts: Post[];
   todos: Todo[];
   activityLog: Activity[];
   isAuthenticated: boolean;
+  isLoading: boolean;
+  authError: string | null;
   toggleLike: (postId: string) => void;
   toggleSave: (postId: string) => void;
   addComment: (postId: string, text: string) => void;
@@ -28,240 +29,219 @@ interface AppContextType {
   toggleTodoItem: (id: string) => void;
   deleteTodoItem: (id: string) => void;
   updateBio: (newBio: string) => void;
-  loginUser: () => void;
+  loginUser: (email: string, password: string) => Promise<boolean>;
+  signupUser: (data: {
+    name: string;
+    university: string;
+    role: "student" | "creator";
+    email: string;
+    password: string;
+  }) => Promise<boolean>;
   logoutUser: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const INITIAL_ACTIVITIES: Activity[] = [
-  { id: "a1", type: "like", text: "Le dio me gusta a la publicación de la Transformada de Fourier de Diego", time: "Hace 2h", accent: "#FF6B6B" },
-  { id: "a2", type: "save", text: "Guardó el curso de Introducción a Ciencia de Datos", time: "Hace 5h", accent: "#3094FF" },
-  { id: "a3", type: "comment", text: "Comentó en la hoja de trucos de Algoritmos", time: "Hace 1d", accent: "#4CAF50" },
-  { id: "a4", type: "publish", text: "Publicó el recurso de la hoja de trucos de Algoritmos", time: "Hace 1d", accent: "#20B2AA" },
-  { id: "a5", type: "follow", text: "Comenzó a seguir a Sofia Herrera", time: "Hace 3d", accent: "#7B68EE" },
-];
+// --- small fetch helper -------------------------------------------------
+// Every API route lives under /api and uses the session cookie for auth, so
+// `credentials: "include"` keeps that cookie flowing on every request.
+async function api<T>(
+  url: string,
+  options: RequestInit = {}
+): Promise<{ ok: boolean; status: number; data: T | { error: string } }> {
+  const res = await fetch(url, {
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    ...options,
+  });
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, status: res.status, data };
+}
 
 export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User>(CURRENT_USER);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [activityLog, setActivityLog] = useState<Activity[]>(INITIAL_ACTIVITIES);
+  const [activityLog, setActivityLog] = useState<Activity[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoaded, setIsLoaded] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [authError, setAuthError] = useState<string | null>(null);
 
-  // Cargar estado inicial desde localStorage
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("sg_user");
-      const storedPosts = localStorage.getItem("sg_posts");
-      const storedTodos = localStorage.getItem("sg_todos");
-      const storedActivity = localStorage.getItem("sg_activity");
-      const storedAuth = localStorage.getItem("sg_auth");
-
-      if (storedUser) setCurrentUser(JSON.parse(storedUser));
-      
-      if (storedPosts) {
-        setPosts(JSON.parse(storedPosts));
-      } else {
-        // Enriquecer posts iniciales con listas de comentarios vacías
-        const enriched = MOCK_POSTS.map(p => ({
-          ...p,
-          commentsList: p.commentsList || [
-            {
-              id: `c_init_${p.id}`,
-              authorName: "Pedro Páramo",
-              avatar: "PP",
-              text: "¡Excelente material! Me sirvió muchísimo para repasar.",
-              createdAt: "Hace 1d"
-            }
-          ]
-        }));
-        setPosts(enriched);
-        localStorage.setItem("sg_posts", JSON.stringify(enriched));
+  // Local cache so the UI has something to show immediately on reload while
+  // the network requests below are in flight. The database (via the API
+  // routes) is always the real source of truth — these are just last-known
+  // snapshots, overwritten as soon as fresh data arrives.
+  const cacheLocally = useCallback(
+    (key: string, value: unknown) => {
+      if (typeof window !== "undefined") {
+        localStorage.setItem(key, JSON.stringify(value));
       }
+    },
+    []
+  );
 
-      if (storedTodos) {
-        setTodos(JSON.parse(storedTodos));
-      } else {
-        setTodos(MOCK_TODOS);
-        localStorage.setItem("sg_todos", JSON.stringify(MOCK_TODOS));
-      }
+  const loadAuthenticatedData = useCallback(async () => {
+    const [postsRes, todosRes, activityRes] = await Promise.all([
+      api<{ posts: Post[] }>("/api/posts"),
+      api<{ todos: Todo[] }>("/api/todos"),
+      api<{ activity: Activity[] }>("/api/activity"),
+    ]);
 
-      if (storedActivity) {
-        setActivityLog(JSON.parse(storedActivity));
-      } else {
-        localStorage.setItem("sg_activity", JSON.stringify(INITIAL_ACTIVITIES));
-      }
-
-      if (storedAuth) {
-        setIsAuthenticated(storedAuth === "true");
-      }
-
-      setIsLoaded(true);
+    if (postsRes.ok && "posts" in postsRes.data) {
+      setPosts(postsRes.data.posts);
+      cacheLocally("sg_posts", postsRes.data.posts);
     }
+    if (todosRes.ok && "todos" in todosRes.data) {
+      setTodos(todosRes.data.todos);
+      cacheLocally("sg_todos", todosRes.data.todos);
+    }
+    if (activityRes.ok && "activity" in activityRes.data) {
+      setActivityLog(activityRes.data.activity);
+      cacheLocally("sg_activity", activityRes.data.activity);
+    }
+  }, [cacheLocally]);
+
+  // On mount: try the offline cache first (instant paint), then check the
+  // real session with the server and reconcile against the database. This
+  // is the standard "hydrate from an external source on mount" effect —
+  // the local reads below are synchronous (localStorage), and the server
+  // check immediately after replaces them with authoritative data.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const storedUser = localStorage.getItem("sg_user");
+    const storedPosts = localStorage.getItem("sg_posts");
+    const storedTodos = localStorage.getItem("sg_todos");
+    const storedActivity = localStorage.getItem("sg_activity");
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial hydration from localStorage, immediately reconciled against the server below
+    if (storedUser) setCurrentUser(JSON.parse(storedUser));
+    if (storedPosts) setPosts(JSON.parse(storedPosts));
+    if (storedTodos) setTodos(JSON.parse(storedTodos));
+    if (storedActivity) setActivityLog(JSON.parse(storedActivity));
+
+    (async () => {
+      const meRes = await api<{ user: User | null }>("/api/auth/me");
+      const user = meRes.ok && "user" in meRes.data ? meRes.data.user : null;
+
+      if (user) {
+        setCurrentUser(user);
+        setIsAuthenticated(true);
+        cacheLocally("sg_user", user);
+        await loadAuthenticatedData();
+      } else {
+        setCurrentUser(null);
+        setIsAuthenticated(false);
+        localStorage.removeItem("sg_user");
+        localStorage.removeItem("sg_posts");
+        localStorage.removeItem("sg_todos");
+        localStorage.removeItem("sg_activity");
+      }
+      setIsLoading(false);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Guardar cambios en localStorage
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem("sg_user", JSON.stringify(currentUser));
-    }
-  }, [currentUser, isLoaded]);
-
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem("sg_posts", JSON.stringify(posts));
-    }
-  }, [posts, isLoaded]);
-
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem("sg_todos", JSON.stringify(todos));
-    }
-  }, [todos, isLoaded]);
-
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem("sg_activity", JSON.stringify(activityLog));
-    }
-  }, [activityLog, isLoaded]);
-
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem("sg_auth", String(isAuthenticated));
-    }
-  }, [isAuthenticated, isLoaded]);
+  // --- Post actions -------------------------------------------------
 
   const toggleLike = (postId: string) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) => {
-        if (post.id === postId) {
-          const isLiked = !post.liked;
-          const likesCount = isLiked ? post.likes + 1 : Math.max(0, post.likes - 1);
-          
-          // Registrar actividad si es like positivo
-          if (isLiked) {
-            const newAct: Activity = {
-              id: `act_${Date.now()}`,
-              type: "like",
-              text: `Le dio me gusta a la publicación de ${post.author.name}`,
-              time: "Ahora mismo",
-              accent: "#FF6B6B",
-            };
-            setActivityLog((prev) => [newAct, ...prev]);
-          }
+    // Optimistic update so the tap feels instant, then reconcile with the
+    // server's response (which has the real counts).
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId
+          ? {
+              ...p,
+              liked: !p.liked,
+              likes: p.liked ? Math.max(0, p.likes - 1) : p.likes + 1,
+            }
+          : p
+      )
+    );
 
-          return { ...post, liked: isLiked, likes: likesCount };
+    api<{ post: Post }>(`/api/posts/${postId}/like`, { method: "POST" }).then(
+      (res) => {
+        if (res.ok && "post" in res.data) {
+          const updated = res.data.post;
+          setPosts((prev) => prev.map((p) => (p.id === postId ? updated : p)));
+          api<{ activity: Activity[] }>("/api/activity").then((a) => {
+            if (a.ok && "activity" in a.data) setActivityLog(a.data.activity);
+          });
         }
-        return post;
-      })
+      }
     );
   };
 
   const toggleSave = (postId: string) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) => {
-        if (post.id === postId) {
-          const isSaved = !post.saved;
-          const savesCount = isSaved ? post.saves + 1 : Math.max(0, post.saves - 1);
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId
+          ? {
+              ...p,
+              saved: !p.saved,
+              saves: p.saved ? Math.max(0, p.saves - 1) : p.saves + 1,
+            }
+          : p
+      )
+    );
 
-          // Registrar actividad
-          const newAct: Activity = {
-            id: `act_${Date.now()}`,
-            type: "save",
-            text: isSaved 
-              ? `Guardó la publicación: "${post.title || post.body.substring(0, 25)}..."`
-              : `Quitó de guardados: "${post.title || post.body.substring(0, 25)}..."`,
-            time: "Ahora mismo",
-            accent: "#3094FF",
-          };
-          setActivityLog((prev) => [newAct, ...prev]);
-
-          return { ...post, saved: isSaved, saves: savesCount };
+    api<{ post: Post }>(`/api/posts/${postId}/save`, { method: "POST" }).then(
+      (res) => {
+        if (res.ok && "post" in res.data) {
+          const updated = res.data.post;
+          setPosts((prev) => prev.map((p) => (p.id === postId ? updated : p)));
+          api<{ activity: Activity[] }>("/api/activity").then((a) => {
+            if (a.ok && "activity" in a.data) setActivityLog(a.data.activity);
+          });
         }
-        return post;
-      })
+      }
     );
   };
 
   const addComment = (postId: string, text: string) => {
     if (!text.trim()) return;
 
-    const newComment: Comment = {
-      id: `c_${Date.now()}`,
-      authorName: currentUser.name,
-      avatar: currentUser.avatar,
-      text: text.trim(),
-      createdAt: "Ahora mismo",
-    };
-
-    setPosts((prevPosts) =>
-      prevPosts.map((post) => {
-        if (post.id === postId) {
-          const updatedCommentsList = post.commentsList ? [...post.commentsList, newComment] : [newComment];
-          
-          // Registrar actividad
-          const newAct: Activity = {
-            id: `act_${Date.now()}`,
-            type: "comment",
-            text: `Comentó en la publicación de ${post.author.name}: "${text.substring(0, 20)}..."`,
-            time: "Ahora mismo",
-            accent: "#4CAF50",
-          };
-          setActivityLog((prev) => [newAct, ...prev]);
-
-          return {
-            ...post,
-            comments: post.comments + 1,
-            commentsList: updatedCommentsList,
-          };
-        }
-        return post;
-      })
-    );
+    api<{ post: Post }>(`/api/posts/${postId}/comments`, {
+      method: "POST",
+      body: JSON.stringify({ text }),
+    }).then((res) => {
+      if (res.ok && "post" in res.data) {
+        const updated = res.data.post;
+        setPosts((prev) => prev.map((p) => (p.id === postId ? updated : p)));
+        api<{ activity: Activity[] }>("/api/activity").then((a) => {
+          if (a.ok && "activity" in a.data) setActivityLog(a.data.activity);
+        });
+      }
+    });
   };
 
   const purchasePost = (postId: string) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) => {
-        if (post.id === postId) {
-          // Registrar actividad de compra
-          const newAct: Activity = {
-            id: `act_${Date.now()}`,
-            type: "save",
-            text: `Adquirió con éxito el recurso Premium: "${post.title}"`,
-            time: "Ahora mismo",
-            accent: "#FFD700",
-          };
-          setActivityLog((prev) => [newAct, ...prev]);
-
-          return { ...post, purchased: true };
-        }
-        return post;
-      })
-    );
+    api<{ post: Post }>(`/api/posts/${postId}/purchase`, {
+      method: "POST",
+    }).then((res) => {
+      if (res.ok && "post" in res.data) {
+        const updated = res.data.post;
+        setPosts((prev) => prev.map((p) => (p.id === postId ? updated : p)));
+        api<{ activity: Activity[] }>("/api/activity").then((a) => {
+          if (a.ok && "activity" in a.data) setActivityLog(a.data.activity);
+        });
+      }
+    });
   };
 
   const reportPost = (postId: string, reason: string) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) => {
-        if (post.id === postId) {
-          // Registrar actividad
-          const newAct: Activity = {
-            id: `act_${Date.now()}`,
-            type: "comment",
-            text: `Reportó la publicación de ${post.author.name} por: "${reason}" (DMCA)`,
-            time: "Ahora mismo",
-            accent: "#FF6B6B",
-          };
-          setActivityLog((prev) => [newAct, ...prev]);
-
-          return { ...post, reported: true };
-        }
-        return post;
-      })
-    );
+    api<{ post: Post }>(`/api/posts/${postId}/report`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    }).then((res) => {
+      if (res.ok && "post" in res.data) {
+        const updated = res.data.post;
+        setPosts((prev) => prev.map((p) => (p.id === postId ? updated : p)));
+        api<{ activity: Activity[] }>("/api/activity").then((a) => {
+          if (a.ok && "activity" in a.data) setActivityLog(a.data.activity);
+        });
+      }
+    });
   };
 
   const addPost = (newPostData: {
@@ -273,73 +253,125 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     isPremium: boolean;
     price?: number;
   }) => {
-    const newPost: Post = {
-      id: `p_${Date.now()}`,
-      author: currentUser,
-      type: newPostData.type,
-      title: newPostData.title,
-      body: newPostData.body,
-      tags: newPostData.tags,
-      likes: 0,
-      comments: 0,
-      commentsList: [],
-      saves: 0,
-      createdAt: "Ahora mismo",
-      isPremium: newPostData.isPremium,
-      price: newPostData.price,
-      subject: newPostData.subject,
-      liked: false,
-      saved: false,
-      purchased: false,
-      reported: false,
-    };
-
-    setPosts((prev) => [newPost, ...prev]);
-
-    // Registrar actividad de publicación
-    const newAct: Activity = {
-      id: `act_${Date.now()}`,
-      type: "publish",
-      text: `Publicó un nuevo contenido: "${newPost.title || newPost.body.substring(0, 25)}..."`,
-      time: "Ahora mismo",
-      accent: "#20B2AA",
-    };
-    setActivityLog((prev) => [newAct, ...prev]);
+    api<{ post: Post }>("/api/posts", {
+      method: "POST",
+      body: JSON.stringify(newPostData),
+    }).then((res) => {
+      if (res.ok && "post" in res.data) {
+        const created = res.data.post;
+        setPosts((prev) => [created, ...prev]);
+        api<{ activity: Activity[] }>("/api/activity").then((a) => {
+          if (a.ok && "activity" in a.data) setActivityLog(a.data.activity);
+        });
+      }
+    });
   };
 
-  const addTodoItem = (text: string, label: Todo["label"], priority: Todo["priority"], dueDate?: string) => {
-    const newTodo: Todo = {
-      id: `t_${Date.now()}`,
-      text,
-      done: false,
-      label,
-      priority,
-      dueDate: dueDate || undefined,
-    };
+  // --- Todo actions -------------------------------------------------
 
-    setTodos((prev) => [newTodo, ...prev]);
+  const addTodoItem = (
+    text: string,
+    label: Todo["label"],
+    priority: Todo["priority"],
+    dueDate?: string
+  ) => {
+    api<{ todo: Todo }>("/api/todos", {
+      method: "POST",
+      body: JSON.stringify({ text, label, priority, dueDate: dueDate || undefined }),
+    }).then((res) => {
+      if (res.ok) {
+        const created = (res.data as { todo: Todo }).todo;
+        setTodos((prev) => [created, ...prev]);
+      }
+    });
   };
 
   const toggleTodoItem = (id: string) => {
     setTodos((prev) =>
       prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t))
     );
+
+    api<{ todo: Todo }>(`/api/todos/${id}`, { method: "PATCH" }).then((res) => {
+      if (res.ok && "todo" in res.data) {
+        const updated = res.data.todo;
+        setTodos((prev) => prev.map((t) => (t.id === id ? updated : t)));
+      }
+    });
   };
 
   const deleteTodoItem = (id: string) => {
     setTodos((prev) => prev.filter((t) => t.id !== id));
+    api(`/api/todos/${id}`, { method: "DELETE" });
   };
+
+  // --- Profile / auth actions -----------------------------------------
 
   const updateBio = (newBio: string) => {
-    setCurrentUser((prev) => ({ ...prev, bio: newBio }));
+    setCurrentUser((prev) => (prev ? { ...prev, bio: newBio } : prev));
+    api<{ user: User }>("/api/user/bio", {
+      method: "PATCH",
+      body: JSON.stringify({ bio: newBio }),
+    });
   };
 
-  const loginUser = () => setIsAuthenticated(true);
-  const logoutUser = () => {
-    setIsAuthenticated(false);
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("sg_auth");
+  const loginUser = async (email: string, password: string): Promise<boolean> => {
+    setAuthError(null);
+    const res = await api<{ user: User } | { error: string }>(
+      "/api/auth/login",
+      { method: "POST", body: JSON.stringify({ email, password }) }
+    );
+
+    if (res.ok && "user" in res.data) {
+      setCurrentUser(res.data.user);
+      setIsAuthenticated(true);
+      cacheLocally("sg_user", res.data.user);
+      await loadAuthenticatedData();
+      return true;
     }
+
+    setAuthError("error" in res.data ? res.data.error : "No se pudo iniciar sesión");
+    return false;
+  };
+
+  const signupUser = async (data: {
+    name: string;
+    university: string;
+    role: "student" | "creator";
+    email: string;
+    password: string;
+  }): Promise<boolean> => {
+    setAuthError(null);
+    const res = await api<{ user: User } | { error: string }>(
+      "/api/auth/signup",
+      { method: "POST", body: JSON.stringify(data) }
+    );
+
+    if (res.ok && "user" in res.data) {
+      setCurrentUser(res.data.user);
+      setIsAuthenticated(true);
+      cacheLocally("sg_user", res.data.user);
+      await loadAuthenticatedData();
+      return true;
+    }
+
+    setAuthError("error" in res.data ? res.data.error : "No se pudo crear la cuenta");
+    return false;
+  };
+
+  const logoutUser = () => {
+    api("/api/auth/logout", { method: "POST" }).finally(() => {
+      setIsAuthenticated(false);
+      setCurrentUser(null);
+      setPosts([]);
+      setTodos([]);
+      setActivityLog([]);
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("sg_user");
+        localStorage.removeItem("sg_posts");
+        localStorage.removeItem("sg_todos");
+        localStorage.removeItem("sg_activity");
+      }
+    });
   };
 
   return (
@@ -350,6 +382,8 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         todos,
         activityLog,
         isAuthenticated,
+        isLoading,
+        authError,
         toggleLike,
         toggleSave,
         addComment,
@@ -361,6 +395,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         deleteTodoItem,
         updateBio,
         loginUser,
+        signupUser,
         logoutUser,
       }}
     >
