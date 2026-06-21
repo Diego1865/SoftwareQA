@@ -2,13 +2,13 @@ import type { MetadataRoute } from 'next'
  
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Next.js PWA',
-    short_name: 'NextPWA',
-    description: 'A Progressive Web App built with Next.js',
+    name: 'Scholar Grid',
+    short_name: 'Scholar Grid',
+    description: 'Plataforma colaborativa que centraliza, organiza y monetiza recursos educativos.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#000000',
+    background_color: '#101411',
+    theme_color: '#101411',
     icons: [
       {
         src: '/icon-192x192.png',
