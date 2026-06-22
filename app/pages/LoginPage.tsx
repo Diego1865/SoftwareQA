@@ -53,9 +53,9 @@ export const LoginPage: React.FC = () => {
       {/* Malla decorativa de fondo */}
       <div className="absolute top-0 left-0 right-0 h-[220px] bg-gradient-to-b from-accent-blue/5 to-transparent pointer-events-none z-0" />
       <div 
-        className="absolute top-0 left-0 right-0 h-[200px] pointer-events-none opacity-5 z-0"
+        className="absolute top-0 left-0 right-0 h-[200px] pointer-events-none opacity-30 z-0"
         style={{
-          backgroundImage: "linear-gradient(#1e2620 1px, transparent 1px), linear-gradient(90deg, #1e2620 1px, transparent 1px)",
+          backgroundImage: "linear-gradient(#cbd5e1 1px, transparent 1px), linear-gradient(90deg, #cbd5e1 1px, transparent 1px)",
           backgroundSize: "32px 32px",
         }}
       />

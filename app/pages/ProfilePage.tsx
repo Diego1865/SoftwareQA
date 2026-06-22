@@ -18,8 +18,8 @@ type Tab = (typeof TABS)[number]["id"];
 
 const ROLE_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   student: { bg: "bg-blue-500/10 border-blue-500/20", text: "text-accent-blue", border: "border-accent-blue/30" },
-  creator: { bg: "bg-purple-500/10 border-purple-500/20", text: "text-purple-400", border: "border-purple-500/30" },
-  moderator: { bg: "bg-emerald-500/10 border-emerald-500/20", text: "text-emerald-400", border: "border-emerald-500/30" },
+  creator: { bg: "bg-purple-50 border-purple-200", text: "text-purple-600", border: "border-purple-300" },
+  moderator: { bg: "bg-emerald-50 border-emerald-200", text: "text-emerald-600", border: "border-emerald-300" },
 };
 
 const ROLE_SPANISH: Record<string, string> = {
@@ -61,7 +61,7 @@ const StatCard: React.FC<{ value: string | number; label: string; accentClass: s
   label,
   accentClass,
 }) => (
-  <div className="flex-1 bg-dark-card border border-dark-border rounded-xl py-3 px-2 text-center shadow-sm">
+  <div className="flex-1 bg-white border border-dark-border rounded-xl py-3 px-2 text-center shadow-sm">
     <div className={`text-xl font-extrabold font-mono tracking-tight leading-none mb-1.5 ${accentClass}`}>
       {value}
     </div>
@@ -87,10 +87,10 @@ const MiniPostCard: React.FC<{ post: any }> = ({ post }) => {
   const accentText = TYPE_ACCENT_TEXT[post.type];
 
   return (
-    <div className="bg-dark-card border border-dark-border rounded-xl p-3.5 flex flex-col gap-2 relative overflow-hidden transition-all duration-200 hover:border-dark-border/60">
+    <div className="bg-white border border-dark-border rounded-xl p-3.5 flex flex-col gap-2 relative overflow-hidden transition-all duration-200 hover:border-dark-border/60">
       
       {/* Badge de tipo de contenido */}
-      <div className={`absolute top-0 right-0 text-[7px] font-mono font-bold tracking-widest px-2 py-0.5 rounded-bl-lg text-text-light bg-dark-border/50 border-l border-b border-dark-border/30`}>
+      <div className={`absolute top-0 right-0 text-[7px] font-mono font-bold tracking-widest px-2 py-0.5 rounded-bl-lg text-text-light bg-slate-100 border-l border-b border-slate-200`}>
         {TYPE_LABEL[post.type]}
       </div>
 
@@ -147,9 +147,9 @@ export const ProfilePage: React.FC<Props> = ({ onNavigate }) => {
         {/* Fondo con malla decorativa */}
         <div className="absolute inset-0 bg-gradient-to-b from-accent-blue/5 to-transparent pointer-events-none" />
         <div 
-          className="absolute inset-0 pointer-events-none opacity-5"
+          className="absolute inset-0 pointer-events-none opacity-40"
           style={{
-            backgroundImage: "linear-gradient(#1e2620 1px, transparent 1px), linear-gradient(90deg, #1e2620 1px, transparent 1px)",
+            backgroundImage: "linear-gradient(#cbd5e1 1px, transparent 1px), linear-gradient(90deg, #cbd5e1 1px, transparent 1px)",
             backgroundSize: "28px 28px",
           }}
         />
@@ -179,7 +179,7 @@ export const ProfilePage: React.FC<Props> = ({ onNavigate }) => {
               ${
                 editBio 
                   ? "bg-accent-blue border-transparent text-text-light shadow-md shadow-accent-blue/20" 
-                  : "bg-dark-card border-dark-border text-text-muted hover:text-text-light hover:border-dark-border/80"
+                  : "bg-white border-dark-border text-text-muted hover:text-text-light hover:border-dark-border/80"
               }
             `}
           >
@@ -238,9 +238,9 @@ export const ProfilePage: React.FC<Props> = ({ onNavigate }) => {
         {/* Tarjetas de estadísticas */}
         <div className="flex gap-2 pb-5">
           <StatCard value={currentUser.followers} label="SEGUIDORES" accentClass="text-accent-blue" />
-          <StatCard value={currentUser.following} label="SEGUIDOS" accentClass="text-purple-400" />
-          <StatCard value={userPosts.length} label="PUBLICACIONES" accentClass="text-teal-400" />
-          <StatCard value={savedPosts.length} label="GUARDADOS" accentClass="text-amber-400" />
+          <StatCard value={currentUser.following} label="SEGUIDOS" accentClass="text-purple-600" />
+          <StatCard value={userPosts.length} label="PUBLICACIONES" accentClass="text-teal-600" />
+          <StatCard value={savedPosts.length} label="GUARDADOS" accentClass="text-amber-600" />
         </div>
 
         {/* Divisor */}
@@ -308,7 +308,7 @@ export const ProfilePage: React.FC<Props> = ({ onNavigate }) => {
 
         {/* ACTIVIDAD pestaña */}
         {activeTab === "activity" && (
-          <div className="bg-dark-card border border-dark-border rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-white border border-dark-border rounded-2xl overflow-hidden shadow-sm">
             {activityLog.length === 0 ? (
               <div className="text-center py-10 text-xs text-text-dark font-mono tracking-widest">
                 SIN ACTIVIDAD RECIENTE
@@ -401,7 +401,7 @@ export const ProfilePage: React.FC<Props> = ({ onNavigate }) => {
               <span className="text-text-dark">{item.icon}</span>
               <span className="text-xs font-sans font-medium">{item.label}</span>
             </div>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2a3a2e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>

@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  --color-dark-bg: #101411;
-  --color-dark-card: #232925;
-  --color-dark-input: #161b17;
-  --color-dark-border: #1e2620;
+  --color-dark-bg: #f0f4f8;
+  --color-dark-card: #ffffff;
+  --color-dark-input: #e8eef4;
+  --color-dark-border: #cbd5e1;
   
   --color-accent-blue: #3094FF;
   --color-accent-blue-deep: #0527FC;
   --color-accent-blue-dark: #212183;
   
-  --color-text-muted: #8fa893;
-  --color-text-dark: #4a5a4e;
-  --color-text-light: #e8ede9;
+  --color-text-muted: #475569;
+  --color-text-dark: #94a3b8;
+  --color-text-light: #0f172a;
   
   --font-serif: 'DM Serif Display', serif;
   --font-sans: 'DM Sans', sans-serif;

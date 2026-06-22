@@ -8,11 +8,11 @@ interface Props {
 }
 
 const LABEL_COLORS: Record<string, { bg: string; text: string }> = {
-  study: { bg: "bg-blue-500/10 border-blue-500/20", text: "text-accent-blue" },
-  assignment: { bg: "bg-red-500/10 border-red-500/20", text: "text-red-400" },
-  exam: { bg: "bg-amber-500/10 border-amber-500/20", text: "text-amber-400" },
-  personal: { bg: "bg-emerald-500/10 border-emerald-500/20", text: "text-emerald-400" },
-  project: { bg: "bg-purple-500/10 border-purple-500/20", text: "text-purple-400" },
+  study: { bg: "bg-blue-50 border-blue-200", text: "text-accent-blue" },
+  assignment: { bg: "bg-red-50 border-red-200", text: "text-red-600" },
+  exam: { bg: "bg-amber-50 border-amber-200", text: "text-amber-600" },
+  personal: { bg: "bg-emerald-50 border-emerald-200", text: "text-emerald-600" },
+  project: { bg: "bg-purple-50 border-purple-200", text: "text-purple-600" },
 };
 
 const LABEL_SPANISH: Record<string, string> = {
@@ -26,7 +26,7 @@ const LABEL_SPANISH: Record<string, string> = {
 const PRIORITY_DOT: Record<string, string> = {
   high: "bg-red-500 shadow-md shadow-red-500/30",
   medium: "bg-amber-400 shadow-md shadow-amber-400/30",
-  low: "bg-text-dark",
+  low: "bg-slate-300",
 };
 
 export const TodoItem: React.FC<Props> = ({ todo, onToggle, onDelete }) => {

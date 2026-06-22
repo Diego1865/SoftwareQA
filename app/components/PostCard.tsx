@@ -7,24 +7,24 @@ interface Props {
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  post: "bg-dark-card border-emerald-500/10",
-  book: "bg-blue-950/40 border-blue-500/10",
-  course: "bg-violet-950/40 border-violet-500/10",
-  resource: "bg-teal-950/40 border-teal-500/10",
+  post: "bg-white border-emerald-500/20",
+  book: "bg-blue-50 border-blue-200",
+  course: "bg-violet-50 border-violet-200",
+  resource: "bg-teal-50 border-teal-200",
 };
 
 const TYPE_ACCENT_TEXT: Record<string, string> = {
-  post: "text-emerald-400",
+  post: "text-emerald-600",
   book: "text-accent-blue",
-  course: "text-violet-400",
-  resource: "text-teal-400",
+  course: "text-violet-600",
+  resource: "text-teal-600",
 };
 
 const TYPE_ACCENT_BG: Record<string, string> = {
-  post: "bg-emerald-500/10 border-emerald-500/20",
-  book: "bg-accent-blue/10 border-accent-blue/20",
-  course: "bg-violet-500/10 border-violet-500/20",
-  resource: "bg-teal-500/10 border-teal-500/20",
+  post: "bg-emerald-50 border-emerald-200",
+  book: "bg-blue-50 border-blue-200",
+  course: "bg-violet-50 border-violet-200",
+  resource: "bg-teal-50 border-teal-200",
 };
 
 const TYPE_LABEL: Record<string, string> = {
@@ -53,7 +53,7 @@ export const PostCard: React.FC<Props> = ({ post }) => {
   // Si fue reportado por derechos de autor, se muestra una advertencia de moderación
   if (post.reported) {
     return (
-      <article className="bg-dark-card/50 border border-red-500/20 rounded-xl p-4 text-center">
+      <article className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
         <svg className="w-8 h-8 text-red-500/60 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
@@ -128,7 +128,7 @@ export const PostCard: React.FC<Props> = ({ post }) => {
           </button>
           
           {showReportMenu && (
-            <div className="absolute right-0 mt-1 w-44 bg-dark-card border border-dark-border rounded-lg shadow-xl z-30 py-1 overflow-hidden animate-fade-in">
+            <div className="absolute right-0 mt-1 w-44 bg-white border border-dark-border rounded-lg shadow-xl z-30 py-1 overflow-hidden animate-fade-in">
               <div className="px-2.5 py-1 text-[8px] font-mono text-text-dark border-b border-dark-border tracking-wider font-bold">MODERACIÓN</div>
               <button
                 onClick={() => {
@@ -181,7 +181,7 @@ export const PostCard: React.FC<Props> = ({ post }) => {
 
       {/* Sección de Monetización Premium con PayPal */}
       {post.isPremium && post.price && (
-        <div className="bg-dark-bg/60 border border-yellow-500/10 rounded-lg p-2.5 flex items-center justify-between mt-1">
+        <div className="bg-amber-50 border border-yellow-200 rounded-lg p-2.5 flex items-center justify-between mt-1">
           <div className="flex flex-col">
             <span className="text-[8px] font-mono text-yellow-500 font-bold tracking-wider">RECURSO PREMIUM</span>
             <span className="text-xs font-mono font-bold text-text-light mt-0.5">${post.price} MXN</span>
@@ -190,12 +190,12 @@ export const PostCard: React.FC<Props> = ({ post }) => {
           <div className="flex items-center gap-2">
             {post.purchased ? (
               <div className="flex flex-col items-end gap-1">
-                <span className="text-[9px] text-emerald-400 font-mono font-bold flex items-center gap-1">
+                <span className="text-[9px] text-emerald-600 font-mono font-bold flex items-center gap-1">
                   ✓ ADQUIRIDO
                 </span>
                 <button 
                   onClick={() => alert(`Iniciando descarga simulada de: ${post.title}.pdf`)}
-                  className="bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-400 text-[10px] font-bold font-mono px-2.5 py-1 rounded cursor-pointer transition-colors"
+                  className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-600 text-[10px] font-bold font-mono px-2.5 py-1 rounded cursor-pointer transition-colors"
                 >
                   DESCARGAR APUNTES
                 </button>
@@ -262,7 +262,7 @@ export const PostCard: React.FC<Props> = ({ post }) => {
           <div className="flex-1" onClick={() => setShowComments(false)} />
           
           {/* Contenido del Cajón */}
-          <div className="bg-dark-card border-t border-dark-border rounded-t-2xl max-h-[70vh] flex flex-col p-4 animate-slide-up pb-[env(safe-area-inset-bottom,16px)]">
+          <div className="bg-white border-t border-dark-border rounded-t-2xl max-h-[70vh] flex flex-col p-4 animate-slide-up pb-[env(safe-area-inset-bottom,16px)]">
             <div className="flex justify-between items-center mb-4 pb-2 border-b border-dark-border">
               <div className="flex items-baseline gap-1.5">
                 <span className="text-sm font-bold text-text-light font-serif">Comentarios</span>
@@ -284,7 +284,7 @@ export const PostCard: React.FC<Props> = ({ post }) => {
                 </div>
               ) : (
                 post.commentsList.map((c) => (
-                  <div key={c.id} className="bg-dark-input border border-dark-border/50 rounded-xl p-2.5 flex gap-2.5">
+                  <div key={c.id} className="bg-dark-input border border-dark-border rounded-xl p-2.5 flex gap-2.5">
                     <div className="w-7 h-7 rounded-full bg-accent-blue/10 border border-accent-blue/20 flex items-center justify-center text-[10px] font-bold font-mono text-accent-blue flex-shrink-0">
                       {c.avatar}
                     </div>
@@ -326,7 +326,7 @@ export const PostCard: React.FC<Props> = ({ post }) => {
       {/* ======================================= */}
       {showPayModal && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-dark-card border border-dark-border rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-scale-in">
+          <div className="bg-white border border-dark-border rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-scale-in">
             {/* Cabecera PayPal */}
             <div className="bg-[#003087] p-4 text-center relative flex items-center justify-center">
               <span className="text-xl font-black italic tracking-tight text-white flex items-baseline">
@@ -394,7 +394,7 @@ export const PostCard: React.FC<Props> = ({ post }) => {
                     ✓
                   </div>
                   <h4 className="text-sm font-bold text-text-light text-center mb-1 font-serif">¡Pago Exitoso!</h4>
-                  <p className="text-xs text-emerald-400 font-mono text-center">Recurso desbloqueado con éxito.</p>
+                  <p className="text-xs text-emerald-600 font-mono text-center">Recurso desbloqueado con éxito.</p>
                 </div>
               )}
 

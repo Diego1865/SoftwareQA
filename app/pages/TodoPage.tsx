@@ -7,11 +7,11 @@ const LABELS: Todo["label"][] = ["study", "assignment", "exam", "personal", "pro
 const PRIORITIES: Todo["priority"][] = ["high", "medium", "low"];
 
 const LABEL_COLORS: Record<string, string> = {
-  study: "border-blue-500/20 bg-blue-500/10 text-accent-blue",
-  assignment: "border-red-500/20 bg-red-500/10 text-red-400",
-  exam: "border-amber-500/20 bg-amber-500/10 text-amber-400",
-  personal: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
-  project: "border-purple-500/20 bg-purple-500/10 text-purple-400",
+  study: "border-blue-200 bg-blue-50 text-accent-blue",
+  assignment: "border-red-200 bg-red-50 text-red-600",
+  exam: "border-amber-200 bg-amber-50 text-amber-600",
+  personal: "border-emerald-200 bg-emerald-50 text-emerald-600",
+  project: "border-purple-200 bg-purple-50 text-purple-600",
 };
 
 const LABEL_COLORS_RAW: Record<string, string> = {
@@ -118,7 +118,7 @@ export const TodoPage: React.FC = () => {
 
       {/* Panel para agregar tarea */}
       {showAdd && (
-        <div className="bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col gap-3.5 mb-4 animate-scale-in">
+        <div className="bg-white border border-dark-border rounded-2xl p-4 flex flex-col gap-3.5 mb-4 animate-scale-in">
           <div>
             <textarea
               value={newText}
@@ -157,8 +157,8 @@ export const TodoPage: React.FC = () => {
               <span className="text-[8px] font-bold text-text-dark font-mono tracking-widest block mb-2">PRIORIDAD</span>
               <div className="flex gap-1.5">
                 {PRIORITIES.map((p) => {
-                  const colorsRaw: Record<string, string> = { high: "text-red-400 bg-red-500/10 border-red-500/20", medium: "text-amber-400 bg-amber-500/10 border-amber-500/20", low: "text-text-dark bg-transparent border-dark-border" };
-                  const selectedColors: Record<string, string> = { high: "text-red-400 bg-red-500/15 border-red-500/30", medium: "text-amber-400 bg-amber-500/15 border-amber-500/30", low: "text-text-muted bg-dark-border border-dark-border" };
+                  const colorsRaw: Record<string, string> = { high: "text-red-500 bg-red-50 border-red-200", medium: "text-amber-500 bg-amber-50 border-amber-200", low: "text-slate-400 bg-transparent border-slate-300" };
+                  const selectedColors: Record<string, string> = { high: "text-red-600 bg-red-50 border-red-300", medium: "text-amber-600 bg-amber-50 border-amber-300", low: "text-slate-600 bg-slate-100 border-slate-300" };
                   return (
                     <button
                       key={p}

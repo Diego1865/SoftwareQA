@@ -8,10 +8,10 @@ interface Props {
 }
 
 const TYPE_OPTIONS: { id: ContentType; label: string; desc: string; accent: string; accentText: string }[] = [
-  { id: "post", label: "PUBLICACIÓN", desc: "Comparte hilos, ideas o conocimientos rápidos", accent: "bg-emerald-500/10 border-emerald-500/20", accentText: "text-emerald-400" },
-  { id: "course", label: "CURSO", desc: "Contenido estructurado de varios módulos", accent: "bg-violet-500/10 border-violet-500/20", accentText: "text-violet-400" },
+  { id: "post", label: "PUBLICACIÓN", desc: "Comparte hilos, ideas o conocimientos rápidos", accent: "bg-emerald-50 border-emerald-200", accentText: "text-emerald-600" },
+  { id: "course", label: "CURSO", desc: "Contenido estructurado de varios módulos", accent: "bg-violet-50 border-violet-200", accentText: "text-violet-600" },
   { id: "book", label: "EBOOK", desc: "Material escrito extenso en PDF o EPUB", accent: "bg-accent-blue/10 border-accent-blue/20", accentText: "text-accent-blue" },
-  { id: "resource", label: "RECURSO", desc: "Apuntes, formularios, guías o código", accent: "bg-teal-500/10 border-teal-500/20", accentText: "text-teal-400" },
+  { id: "resource", label: "RECURSO", desc: "Apuntes, formularios, guías o código", accent: "bg-teal-50 border-teal-200", accentText: "text-teal-600" },
 ];
 
 const SUBJECTS = [
@@ -206,7 +206,7 @@ export const UploadPage: React.FC<Props> = ({ onNavigate }) => {
             </div>
 
             {/* Monetización (Contenido Premium) */}
-            <div className="bg-dark-card border border-dark-border rounded-xl p-4 flex flex-col gap-3">
+            <div className="bg-white border border-dark-border rounded-xl p-4 flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-[9px] font-extrabold font-mono text-text-light tracking-wide block">CONTENIDO PREMIUM</span>

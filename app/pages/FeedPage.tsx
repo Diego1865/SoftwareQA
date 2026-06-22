@@ -139,7 +139,7 @@ export const FeedPage: React.FC<Props> = ({ onNavigate }) => {
 
         {/* Dropdown de selección de materia */}
         {showSubjects && (
-          <div className="mx-4 mb-3 bg-dark-card border border-dark-border rounded-xl overflow-hidden shadow-xl animate-scale-in">
+          <div className="mx-4 mb-3 bg-white border border-dark-border rounded-xl overflow-hidden shadow-xl animate-scale-in">
             {SUBJECTS.map((s) => (
               <button
                 key={s}
